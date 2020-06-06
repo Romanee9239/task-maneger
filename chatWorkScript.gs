@@ -1,44 +1,16 @@
-function sendMessage(body){
-  const cw = ChatWorkClient.factory({token: '4c87e81bedcfd3f62c2a0675d81e8af7'});
-  cw.sendMessageToMyChat(body);
-}
-
-function sendTest(){
-  var msg = '[toall]\r\nテスト';
-  const cw = ChatWorkClient.factory({token: '4c87e81bedcfd3f62c2a0675d81e8af7'});
-  cw.sendMessage({
-    room_id: 192356231, // ここでルームID
-    body: msg
-  });
-}
-
-/***********************************
- * 締め切りの確認をして、CWに通知するbot
- * return アラートメッセージ
- ***********************************/
 function sendDairyTask(){
-  const cw = ChatWorkClient.factory({token: '4c87e81bedcfd3f62c2a0675d81e8af7'});
+  const cw = ChatWorkClient.factory({token: '@token@'});
   
   var sht = SpreadsheetApp.openById('1o8s4VaFvgzAOUkEOALxNcEVVKqV9gLnQXXoDNLDjS4I');
   
   var task_sht = sht.getSheetByName("受注");
   var last_row = task_sht.getLastRow();
   
-  /*
-  * タスク一覧を取得
-  * E列が”完了”以外の場合、未完とみなす
-  * F列が未入力、日付以外の場合、いつでもいいとみなす
-  */
-  //クライアント名
   const CLT_NAME_COL = 2;
-  //タスク名（タイトル）
   const TASK_NAME_COL = 3;
-  //ステータス
   const NEW_FLG_COL = 5;
-  //締め切り
   const DEAD_LINE_COL = 6;
   
-  //開始行
   const CHK_STA_ROW = 6;
   
   var client = [];
@@ -66,7 +38,7 @@ function sendDairyTask(){
     if (tmp_date === undefined || tmp_date !== "[object Date]"){
       continue;
     }
-    //タスク名空白、ステータス「完了」はスキップ
+
     if (task_tmp == '' || task_flg === true){
       continue;
     }
@@ -82,7 +54,6 @@ function sendDairyTask(){
     k++;
   }
   
-  //メッセージ成形
   const def_label = '【@label@】\r\n';
   
   var working = def_label.replace('@label@', '作業中のタスク');
@@ -92,7 +63,6 @@ function sendDairyTask(){
   
   var set_sht = sht.getSheetByName("設定・使い方");
   
-  //通知設定の行、列
   const DEF_SET_COL = 3;
   const DEF_ALT_ROW = 1;
   
@@ -115,22 +85,18 @@ function sendDairyTask(){
   
   var m = DEF_ALT_ROW;
   var nonmsg = 0;
-  //作業中
   if (set_sht.getRange(m++, DEF_SET_COL)){
     message += working + '\r\n';
     nonmsg++;
   }
-  //前日
   if (set_sht.getRange(m++, DEF_SET_COL)){
     message += tommorow + '\r\n';
     nonmsg++;
   }
-  //締め切り当日
   if (set_sht.getRange(m++, DEF_SET_COL)){
     message += ondead + '\r\n';
     nonmsg++;
   }
-  //過ぎてる
   if (set_sht.getRange(m++, DEF_SET_COL)){
     message += lineover + '\r\n';
     nonmsg++;
