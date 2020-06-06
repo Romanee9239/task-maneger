@@ -4,24 +4,22 @@ function sendMessage(body){
 }
 
 function sendTest(){
-  var msg = '改行\r\nテスト';
-  msg = chkDeadLine();
-  sendMessage(msg);
-}
-
-function sendDairyTask(){
-  sendMessage(chkDeadLine());
+  var msg = '[toall]\r\nテスト';
+  const cw = ChatWorkClient.factory({token: '4c87e81bedcfd3f62c2a0675d81e8af7'});
+  cw.sendMessage({
+    room_id: 192356231, // ここでルームID
+    body: msg
+  });
 }
 
 /***********************************
  * 締め切りの確認をして、CWに通知するbot
  * return アラートメッセージ
  ***********************************/
-function chkDeadLine(){
+function sendDairyTask(){
+  const cw = ChatWorkClient.factory({token: '4c87e81bedcfd3f62c2a0675d81e8af7'});
   
   var sht = SpreadsheetApp.openById('1o8s4VaFvgzAOUkEOALxNcEVVKqV9gLnQXXoDNLDjS4I');
-  //var sht = SpreadsheetApp.getActiveSpreadsheet();
-  //var ui = SpreadsheetApp.getUi();
   
   var task_sht = sht.getSheetByName("受注");
   var last_row = task_sht.getLastRow();
@@ -69,7 +67,7 @@ function chkDeadLine(){
       continue;
     }
     //タスク名空白、ステータス「完了」はスキップ
-    if (task_tmp == '' || task_flg === false){
+    if (task_tmp == '' || task_flg === true){
       continue;
     }
     
@@ -80,8 +78,6 @@ function chkDeadLine(){
     
     alartType[k] = dldate.diff(todate,'days');
     alartType[k] = (dldate - todate)/1000/60/60/24 + (2/3);
-    
-    //ui.alert(dldate + '\r\n' + todate + '\r\n' + alartType[k]); // 
     
     k++;
   }
@@ -104,7 +100,6 @@ function chkDeadLine(){
   
   for(var x = 0; x < k; x++){
     working += client[x] + '様_' + taskName[x] + '\r\n';
-    //ui.alert(taskName[x] + ':' + alartType[x]);
     switch (true){
       case alartType[x] == 1:
         tommorow += client[x] + '様_' + taskName[x] + '\r\n';
@@ -119,23 +114,42 @@ function chkDeadLine(){
   }
   
   var m = DEF_ALT_ROW;
+  var nonmsg = 0;
   //作業中
   if (set_sht.getRange(m++, DEF_SET_COL)){
     message += working + '\r\n';
+    nonmsg++;
   }
   //前日
   if (set_sht.getRange(m++, DEF_SET_COL)){
     message += tommorow + '\r\n';
+    nonmsg++;
   }
   //締め切り当日
   if (set_sht.getRange(m++, DEF_SET_COL)){
     message += ondead + '\r\n';
+    nonmsg++;
   }
   //過ぎてる
   if (set_sht.getRange(m++, DEF_SET_COL)){
     message += lineover + '\r\n';
+    nonmsg++;
   }
   
-  return message;
+  if (nonmsg == 0){
+    return;
+  }
+  
+  const ROOM_ID_ROW = 5;
+  var roomId = set_sht.getRange(ROOM_ID_ROW, 2).getValue();
+  
+  if (!isNaN(roomId) && roomId !== ''){
+    cw.sendMessage({
+      room_id: roomId,
+      body: message
+    });
+  }else{
+    cw.sendMessageToMyChat(message);
+  }
   
 }
