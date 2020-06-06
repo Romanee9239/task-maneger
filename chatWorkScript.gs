@@ -1,7 +1,7 @@
 function sendDairyTask(){
   const cw = ChatWorkClient.factory({token: '@token@'});
   
-  var sht = SpreadsheetApp.openById('1o8s4VaFvgzAOUkEOALxNcEVVKqV9gLnQXXoDNLDjS4I');
+  var sht = SpreadsheetApp.openById('@sht_id@');
   
   var task_sht = sht.getSheetByName("受注");
   var last_row = task_sht.getLastRow();
