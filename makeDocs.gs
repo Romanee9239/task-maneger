@@ -81,7 +81,7 @@ function createTaskDocs(){
        },
      ]};
      Sheets.Spreadsheets.batchUpdate(resource, sht.getId());
-     
+     task_sht.getRange(newTaskRow[j], NEW_FLG_COL).setValue('FALSE');
    }
    
 }
