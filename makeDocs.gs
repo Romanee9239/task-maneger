@@ -33,6 +33,7 @@ function createTaskDocs(){
    
    var mngDirId = set_sht.getRange(SAVE_DIR_ROW, 2).getValue();
    Logger.log(mngDirId);
+   mngDirId = mngDirId.replace('u/0/','');
    mngDirId = mngDirId.replace('https://drive.google.com/drive/folders/','');
    if (mngDirId == ''){
      mngDirId = '1fkTN2yFa1zqAdhOoApYQdpcR7N_nTu1Y';
